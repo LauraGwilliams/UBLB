@@ -1,0 +1,62 @@
+import mne
+
+# run the kit2fiff gui:
+mne.gui.kit2fiff()
+
+
+# define the participant's fif file in memory #
+participant = 'A0032_UBLB_13Oct13_01_analysis_01_nr-raw.fif'
+
+# define the path of the experiment #
+pathtodata = '/Users/meglab/Documents/Temp/UBLB_MNE_ANALYSIS/UBLB'
+
+# read events#
+evts2 = mne.find_stim_steps( mne.fiff.Raw( pathtodata + '/' + participant[0:5] + '/' + participant ), merge =-1 )
+
+evts2 = evts2[find(evts2[:,2]>0),:]
+
+# add pseudo event #
+l = numpy.insert( evts2, 0, 0, axis=0 ).tolist()
+
+for row in l: row.insert( 1, row[0]/1000.0 )
+
+# print to fixed-width text #
+widths=(5,9,8,9,9)
+
+newL = []
+
+# go through each list in l #
+for items in l:
+    itemNumber = 0
+    newList = []
+   
+# and then.. #
+for item in items:
+    if itemNumber == 1:
+        item = "%.3f" % item
+        CorrectedItem = item
+        itemNumber = itemNumber + 1
+        newList.append(CorrectedItem)
+    elif itemNumber == 3:     
+        newList.append(item)
+        newL.append(newList)
+    else:    
+        newList.append(item)
+        itemNumber = itemNumber + 1
+        
+# and then .. #
+for items in newL:
+    row = "".join("%*s" % i for i in zip(widths,items))
+    row = row + '\n'
+    with open(participant[0:5] + '.eve', 'a') as outcsv:
+        outcsv.write(row)
+        
+for items in l:
+    row = "".join("%*s" % i for i in zip(widths,items))
+    row = row + '\n'
+    with open(participant[0:5] + '_all_events' + '.eve', 'a') as outcsv:
+        outcsv.write(row)
+        
+### end of python preprocessing....#
+
+
